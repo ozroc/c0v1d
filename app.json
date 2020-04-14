@@ -1,12 +1,12 @@
 {
-  "name": "Flask Heroku Sample",
-  "description": "A sample Flask app on Heroku",
+  "name": "ozroc c0v1d data",
+  "description": "Some calculations",
   "keywords": [
     "flask",
     "python",
-    "sample"
+    "covid-data"
   ],
-  "repository": "https://github.com/yefim/flask-heroku-sample",
+  "repository": "https://github.com/ozroc/c0v1d",
   "scripts": {
     "postdeploy": "python -c 'from app import db; db.create_all()'"
   },
