@@ -11,7 +11,8 @@ class Covid(object):
         
     def update(self):
         # invalidate the cache
-        del self.__dict__['df']
+        if 'df' in self.__dict__.keys():
+            del self.__dict__['df']
         # get all data
         Confirmed = pandas.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
         Deaths = pandas.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
