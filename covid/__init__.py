@@ -56,9 +56,17 @@ class Covid(object):
             self.update()
             return pandas.read_sql_table('global', self.db)
   
-    @property
-    def countries(self): 
-        return sorted(set(self.df.location))
+    @cached_property_with_ttl(ttl=3600)
+    def countries(self):
+        countries = []
+        df = self.df[['location', 'C']]
+        df = df.groupby('location').max()
+        m = df.C.min()
+        M = df.C.max()
+        df.C = (df.C-m)/(M-m)*12+8
+        for i in df.index:
+            countries.append({'name':i, 'size' : int(df['C'].loc[i])})       
+        return countries
 
 
     def get_country(self, countryname):

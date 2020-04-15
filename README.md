@@ -1,5 +1,5 @@
-Flask Heroku Sample
-====================
+Covid Flask Heroku Sample
+===============================
 
 A simple Python Flask example application that's ready to run on Heroku.
 
@@ -13,10 +13,6 @@ A simple Python Flask example application that's ready to run on Heroku.
 
 * `python app.py`
 
-## Screenshot
-
-![screenshot](https://i.imgur.com/wf74fxY.png)
-
 ## Deploy
 
 * `heroku create`
@@ -25,15 +21,10 @@ A simple Python Flask example application that's ready to run on Heroku.
 
 * `git push heroku master`
 
-* Note: make sure you run `db.create_all()` to create the tables: 
-```bash
-$ heroku run python
-Python 3.6.8 (default, Jan 29 2019, 19:35:16)
->>> from app import db
->>> db.create_all()
->>> exit()
-```
 
 ## Contributors
 
+* [Ozroc](https://twitter.com/ozrocpablo)
+
+Forked from an original sample by
 * [Yefim](https://twitter.com/yefim)

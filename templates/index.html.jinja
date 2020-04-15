@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="text/javascript" language="javascript"
+	    src="https://www.goat1000.com/tagcanvas.min.js"></script>
+    <script type="text/javascript">
+      window.onload = function() {
+      try {
+      TagCanvas.Start('myCanvas','weightTags',{
+      textColour: '#0000ff',
+      outlineColour: '#ff00ff',
+      reverse: true,
+      depth: 0.8,
+      weight: true,
+      weightFrom: "data-weight",
+      maxSpeed: 0.05
+      });
+      } catch(e) {
+      // something went wrong, hide the canvas container
+      document.getElementById('myCanvasContainer').style.display = 'none';
+      }
+      };
+    </script>
+  </head>
+
+  <body>
+     <h1>Available Countries</h1>
+    <div id="myCanvasContainer">
+      <canvas width="900" height="900" id="myCanvas">
+        <p>Anything in here will be replaced on browsers that support the canvas element</p>
+      </canvas>
+    </div>
+    <div id="weightTags">
+      <ul>
+	{% for item in countries %}
+        <li><a href="/plot/{{ item.name }}" style="font-size: {{ item.size }}pt">{{ item.name }}</a></li>
+	{% endfor %}
+      </ul>
+    </div>
+  </body>
+</html>
+  

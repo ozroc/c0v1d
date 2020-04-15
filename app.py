@@ -18,11 +18,8 @@ COVID = Covid(db_engine)
     
 @app.route('/', methods=['GET'])
 def index():
-  country_string = ''
-  for i in COVID.countries:
-    country_string+='<br><a href="/plot/' + i + '">%s</a>' % i
-  return country_string
-
+    
+    return render_template('index.html.jinja', countries = COVID.countries)
 
 
 @app.route('/plot/<country>', methods=['POST', 'GET'])
