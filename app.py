@@ -20,7 +20,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 db_engine =  create_engine(DATABASE_URL)
 
 
-
 @app.route('/', methods=['GET'])
 def index():
   df = pandas.read_sql_table('global', db_engine)
@@ -75,38 +74,12 @@ def plot(country):
   df.index = df.date
   df = df[['days_from_first_c', 'C', 'R', 'D']]
   
-  return '''
-<html>
-  <head>
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css">
+  return render_template('layout.html.jinja',
+                         bokeh_script = script,
+                         bokeh_figures = div,
+                         datatable = df.to_html(classes = '" id = "dataframe')
+  )
 
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.js"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.0.1.min.js"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.0.1.min.js"
-        crossorigin="anonymous"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js">
-  </script>
-  <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
-  <script type="text/javascript" class="init">
-$(document).ready(function() {
-  $('#dataframe').DataTable();
-  } );
-
-</script>
-%s
-</head>
-<body>
-%s
-<p>
-  %s
-</body>
-</html>  ''' % (script, div, df.to_html(classes = '" id = "dataframe'))
-  
 @app.route('/update', methods=['GET'])
 def update():
   Confirmed = pandas.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
