@@ -58,7 +58,7 @@ class Covid(object):
   
     @property
     def countries(self): 
-        countries = sorted(set(self.df.location))
+        return sorted(set(self.df.location))
 
 
     def get_country(self, countryname):
