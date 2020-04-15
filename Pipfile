@@ -13,6 +13,7 @@ gunicorn = "*"
 flask = "*"
 flask-sqlalchemy = "*"
 numpy = "*"
+cached-property = "*"
 
 [requires]
 python_version = "3.7"
