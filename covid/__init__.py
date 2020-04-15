@@ -48,7 +48,8 @@ class Covid(object):
         df.to_sql('global', self.db, if_exists='replace')
         return True
     
-    @cached_property_with_ttl(ttl=3600)
+    #cached_property_with_ttl(ttl=3600)
+    @property 
     def df(self):
         try:
             return pandas.read_sql_table('global', self.db)
