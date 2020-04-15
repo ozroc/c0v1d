@@ -28,6 +28,13 @@
     {{ bokeh_script }}
   </head>
   <body>
+    <select id="dynamic_select"  onchange="if (this.value) window.location.href=this.value">
+      <option value="/" selected>Available Countries</option>
+      {% for item in countries %}
+      <option value="/plot/{{ item.name }}">{{ item.name }}</option>
+      {% endfor %}
+    </select>
+    <hr>
     {{ bokeh_figures }}
     <p>
       {{ datatable }}

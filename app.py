@@ -37,7 +37,8 @@ def plot(country):
   return render_template('layout.html.jinja',
                          bokeh_script = script1+script2,
                          bokeh_figures = div1+div2,
-                         datatable = df.to_html(classes = '" id = "dataframe')
+                         datatable = df.to_html(classes = '" id = "dataframe',),
+                         countries = COVID.countries
   )
 
 @app.route('/update', methods=['GET'])

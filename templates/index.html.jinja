@@ -21,10 +21,17 @@
       }
       };
     </script>
+
   </head>
 
   <body>
-     <h1>Available Countries</h1>
+    <select id="dynamic_select" onchange="if (this.value) window.location.href=this.value">
+      <option value="/" selected>Available Countries</option>
+      {% for item in countries %}
+      <option value="/plot/{{ item.name }}">{{ item.name }}</option>
+      {% endfor %}
+    </select>
+    <hr>
     <div id="myCanvasContainer">
       <canvas width="900" height="900" id="myCanvas">
         <p>Anything in here will be replaced on browsers that support the canvas element</p>
