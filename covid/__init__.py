@@ -2,8 +2,27 @@ import pandas
 
 from bokeh.plotting import figure
 from bokeh.embed import components
-from bokeh.models import HoverTool
+from bokeh.models import HoverTool, TapTool, OpenURL, WheelZoomTool
+from bokeh.models import GMapPlot, GMapOptions
+from bokeh.tile_providers import CARTODBPOSITRON, get_provider
+
 from cached_property import cached_property_with_ttl
+import numpy as np
+import math
+
+x_range,y_range=([-15187814,-6458032], [2505715,6567666])
+
+#FUNCTION TO CONVERT GCS WGS84 TO WEB MERCATOR
+def wgs84_to_web_mercator(df, lon="long", lat="lat"):
+    k = 6378137
+    df["x"] = df[lon] * (k * np.pi/180.0)
+    df["y"] = np.log(np.tan((90 + df[lat]) * np.pi/360.0)) * k
+    return df
+
+def merc(lo, la):
+    x, y = pyproj.transform(google_projection, project_projection, lo, la)
+    return x, y
+
 
 class Covid(object):
     def __init__(self, db_engine):
@@ -83,7 +102,35 @@ class Covid(object):
         dataframe = dataframe.reset_index()
         return dataframe
 
-    
+    def plot_map(self):
+        today = self.df.groupby('location').last()
+        
+        today['size']=today.C/today.C.max()*50+5
+        
+        wgs84_to_web_mercator(today)
+        tile_provider = get_provider(CARTODBPOSITRON)
+        p = figure(plot_width=900, plot_height=600,
+                   #x_range=x_range, y_range=y_range,
+                   #x_range=(today.long.min(), today.long.max()), y_range=(today.lat.min(), today.long.max()),
+                   x_axis_type="mercator", y_axis_type="mercator", tools='tap')
+        p.add_tile(tile_provider)
+        p.circle(x="x", y="y", size="size", fill_color="blue", fill_alpha=0.5, source=today)
+        htool = HoverTool(
+            tooltips=[
+                ("Location", "@location"),
+                ("Confirmed", "@C"),
+                ("Recovered", "@R"),
+                ("Deaths", "@D")
+            ]    
+        )
+        wzt = WheelZoomTool()
+        p.add_tools(htool)
+        p.add_tools(wzt)
+        p.toolbar.active_scroll = wzt
+        url = "/plot/@location"
+        taptool = p.select(type=TapTool)
+        taptool.callback = OpenURL(url=url, same_tab=True)
+        return components(p)
     
     def plot_diffs(self, countryname):
         dataframe = self.get_country(countryname)

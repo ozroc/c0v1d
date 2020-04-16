@@ -33,7 +33,8 @@
       {% for item in countries %}
       <option value="/plot/{{ item.name }}">{{ item.name }}</option>
       {% endfor %}
-    </select>
+    </select>    <a href="/"> Go back to Map</a>
+
     <hr>
     {{ bokeh_figures }}
     <p>

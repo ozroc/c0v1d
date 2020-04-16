@@ -15,6 +15,7 @@ flask-sqlalchemy = "*"
 numpy = "*"
 cached-property = "*"
 psycopg2-binary = "*"
+pyproj = "*"
 
 [requires]
 python_version = "3.7"
