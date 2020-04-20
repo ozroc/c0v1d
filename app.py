@@ -26,16 +26,15 @@ def index():
 @app.route('/plot/<country>', methods=['POST', 'GET'])
 def plot(country):
 
-  script1, div1 = COVID.plot_absolutes(country)
-  script2, div2 = COVID.plot_diffs(country)
+  script, div = COVID.plot_country(country)
   df = COVID.get_country(country)
   df = df[df.days_from_first_c > 0]
   df.index = df.date
   df = df[['days_from_first_c', 'C', 'R', 'D', 'I']]
   df.columns = ['Days from first 100 cases', 'Confirmed', 'Recovered', 'Deaths', 'Infected']
   return render_template('layout.html.jinja',
-                         bokeh_script = script1+script2,
-                         bokeh_figures = div1+div2,
+                         bokeh_script = script,
+                         bokeh_figures = div,
                          datatable = df.to_html(classes = '" id = "dataframe',),
                          countries = COVID.countries
   )

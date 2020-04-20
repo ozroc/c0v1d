@@ -1,6 +1,6 @@
 import pandas
 
-from bokeh.plotting import figure
+from bokeh.plotting import figure, gridplot
 from bokeh.embed import components
 from bokeh.models import HoverTool, TapTool, OpenURL, WheelZoomTool
 from bokeh.models import GMapPlot, GMapOptions
@@ -132,37 +132,7 @@ class Covid(object):
         taptool.callback = OpenURL(url=url, same_tab=True)
         return components(p)
     
-    def plot_diffs(self, countryname):
-        dataframe = self.get_country(countryname)
-        htool = HoverTool(
-            tooltips=[
-                ("date", "@x{%F}"),
-                ("value", "@y")
-            ],    
-            formatters={
-                '@x'        : 'datetime'
-            },
-        )
-
-        p = figure(title='Daily increments for %s' % countryname,
-                   x_axis_type='datetime',
-                   plot_width=900, plot_height=300,
-                   tools='pan,wheel_zoom,box_zoom,reset',
-        )
-        p.line(dataframe.date, dataframe.diff_C,
-               legend_label='Confirmed', color='blue')
-        p.line(dataframe.date, dataframe.diff_I,
-               legend_label='Infected', color='orange')
-        p.line(dataframe.date, dataframe.diff_D,
-               legend_label='Deaths', color='red')
-        p.line(dataframe.date, dataframe.diff_R,
-               legend_label='Recovered', color='green')
-        p.legend.location = 'top_left'
-        p.legend.click_policy="hide"
-        p.add_tools(htool)
-        return components(p)
-
-    def plot_absolutes(self, countryname):
+    def plot_country(self, countryname):
         dataframe = self.get_country(countryname)
         htool = HoverTool(
             tooltips=[
@@ -173,21 +143,44 @@ class Covid(object):
                 '@x'        : 'datetime'
             }
         )
-        p = figure(title='Absolute values for %s' % countryname,
+        p1 = figure(title='Absolute values for %s' % countryname,
                    x_axis_type='datetime',
                    plot_width=900, plot_height=300,
                    tools='pan,wheel_zoom,box_zoom,reset'
         )
-        p.line(dataframe.date, dataframe.C,
+        p1.line(dataframe.date, dataframe.C,
                legend_label='Confirmed', color='blue')
-        p.line(dataframe.date, dataframe.I,
+        p1.line(dataframe.date, dataframe.I,
                legend_label='Infected', color='orange')
-        p.line(dataframe.date, dataframe.D,
+        p1.line(dataframe.date, dataframe.D,
                legend_label='Deaths', color='red')
-        p.line(dataframe.date, dataframe.R,
+        p1.line(dataframe.date, dataframe.R,
                legend_label='Recovered', color='green')
-        p.legend.location = 'top_left'
-        p.legend.click_policy="hide"
-        p.add_tools(htool)
+        p1.legend.location = 'top_left'
+        p1.legend.click_policy="hide"
+        p1.add_tools(htool)
+        
+
+        p2 = figure(title='Daily increments for %s' % countryname,
+                    x_axis_type='datetime',
+                    x_range = p1.x_range,
+                    plot_width=900, plot_height=300,
+                    tools='pan,wheel_zoom,box_zoom,reset',
+        )
+        p2.line(dataframe.date, dataframe.diff_C,
+               legend_label='Confirmed', color='blue')
+        p2.line(dataframe.date, dataframe.diff_I,
+               legend_label='Infected', color='orange')
+        p2.line(dataframe.date, dataframe.diff_D,
+               legend_label='Deaths', color='red')
+        p2.line(dataframe.date, dataframe.diff_R,
+               legend_label='Recovered', color='green')
+        p2.legend.location = 'top_left'
+        p2.legend.click_policy="hide"
+        p2.add_tools(htool)
+
+        p=gridplot([[p1],[p2]])
+        
         return components(p)
+
 
