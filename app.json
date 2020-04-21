@@ -1,16 +1,17 @@
 {
-  "name": "ozroc c0v1d data",
-  "description": "Some calculations",
-  "keywords": [
-    "flask",
-    "python",
-    "covid-data"
-  ],
-  "repository": "https://github.com/ozroc/c0v1d",
-  "scripts": {
-    "postdeploy": "python -c 'from app import db; db.create_all()'"
-  },
-  "addons": [
-    "heroku-postgresql"
-  ]
+    "name": "ozroc c0v1d data",
+    "description": "Some calculations on COVID data",
+    "keywords": [
+	"flask",
+	"python",
+	"covid-data",
+	"bokeh"
+    ],
+    "repository": "https://github.com/ozroc/c0v1d",
+    "scripts": {
+	"postdeploy": "python -c 'from app import db; db.create_all()'"
+    },
+    "addons": [
+	"heroku-postgresql"
+    ]
 }

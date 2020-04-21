@@ -182,5 +182,3 @@ class Covid(object):
         p=gridplot([[p1],[p2]])
         
         return components(p)
-
-

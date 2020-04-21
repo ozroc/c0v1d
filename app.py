@@ -3,11 +3,21 @@ import os
 from flask import Flask, render_template, render_template_string, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
+from tornado.ioloop import IOLoop
+from threading import Thread
+
+from bokeh.server.server import Server
+from bokeh.embed import server_document
+
+
 
 from covid import Covid
+from covid.model import get_model_bk
 
 app = Flask(__name__)
 
+port = int(os.environ.get('PORT', 5000))
+bokeh_port = int(os.environ.get('BOKEH_PORT', 9090))
 
 DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:////tmp/flask_app.db')
 DATABASE_URL = 'sqlite:////tmp/flask_app.db'
@@ -20,7 +30,7 @@ COVID = Covid(db_engine)
 @app.route('/', methods=['GET'])
 def index():
     script, div = COVID.plot_map()
-    return render_template('index.html.jinja', script = script, div = div, countries = COVID.countries)
+    return render_template('index.html.jinja', script = script, div = div, countries = list(map(lambda x: x['name'], COVID.countries)))
 
 
 @app.route('/plot/<country>', methods=['POST', 'GET'])
@@ -44,78 +54,24 @@ def update():
   COVID.update()
   return 'Updated OK'
 
-@app.route('/bokeh', methods=['GET'])
-def bokeh():
-    import numpy as np
 
-    from bokeh.layouts import column, row
-    from bokeh.models import ColumnDataSource, Slider, TextInput
-    from bokeh.plotting import figure
-    from bokeh.embed import components, server_document
+@app.route('/model', methods=['GET'])
+def model():
+    script = server_document('http://0.0.0.0:%s/bkapp' % bokeh_port)
+    div=''
+    return render_template('index.html.jinja', script = div, div = script, countries = COVID.countries)
 
+model_bk = get_model_bk(COVID)
 
-    # Set up data
-    N = 200
-    x = np.linspace(0, 4*np.pi, N)
-    y = np.sin(x)
-    source = ColumnDataSource(data=dict(x=x, y=y))
+def bk_worker():
+    # Can't pass num_procs > 1 in this configuration. If you need to run multiple
+    # processes, see e.g. flask_gunicorn_embed.py
+    server = Server({'/bkapp': model_bk}, io_loop=IOLoop(), allow_websocket_origin=["0.0.0.0:%s" % port], port=bokeh_port)
+    server.start()
+    server.io_loop.start()
 
-
-    # Set up plot
-    plot = figure(plot_height=400, plot_width=400, title="my sine wave",
-                  tools="crosshair,pan,reset,save,wheel_zoom",
-                  x_range=[0, 4*np.pi], y_range=[-2.5, 2.5])
-
-    plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
-
-
-    # Set up widgets
-    text = TextInput(title="title", value='my sine wave')
-    offset = Slider(title="offset", value=0.0, start=-5.0, end=5.0, step=0.1)
-    amplitude = Slider(title="amplitude", value=1.0, start=-5.0, end=5.0, step=0.1)
-    phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi)
-    freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
-
-
-    # Set up callbacks
-    def update_title(attrname, old, new):
-        plot.title.text = text.value
-
-    text.on_change('value', update_title)
-
-    def update_data(attrname, old, new):
-
-        # Get the current slider values
-        a = amplitude.value
-        b = offset.value
-        w = phase.value
-        k = freq.value
-
-        # Generate the new curve
-        x = np.linspace(0, 4*np.pi, N)
-        y = a*np.sin(k*x + w) + b
-
-        source.data = dict(x=x, y=y)
-
-    for w in [offset, amplitude, phase, freq]:
-        w.on_change('value', update_data)
-
-
-    # Set up layouts and add to document
-    inputs = column(text, offset, amplitude, phase, freq)
-    server = server_document("http://0.0.0.0:5000/bokeh")
-    script, div = components(row(inputs, plot, width=800))
-
-    return render_template_string('''{% autoescape false %}<html><head><script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.0.1.min.js"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.0.1.min.js"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.0.1.min.js"
-            crossorigin="anonymous"></script>{{ server }}{{ script }}</head><body>{{ div }}</body></html>{% endautoescape %}''', script = script, div = div, server=server)
-
+Thread(target=bk_worker).start()
 
 
 if __name__ == '__main__':
-  #db_engine.create_all()
-  port = int(os.environ.get('PORT', 5000))
-  app.run(host='0.0.0.0', port=port, debug=True)
+  app.run(port=port, debug=True)
